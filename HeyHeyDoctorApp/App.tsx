@@ -8,30 +8,35 @@
  * @format
  */
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {SafeAreaView} from 'react-native';
-import fb from './src/hailJesus/FirebaseInterface';
-
-import ChatWindow from './src/ChatWindow';
+import GiftedChatWrapper from './src/GiftedChatWrapper';
+//
+// const App = () => {
+//   const [message, setMessage] = useState('');
+//
+//   useEffect(() => {
+//     fb.registerForNewMessages(messageFromServer => {
+//       setMessage(messageFromServer);
+//     });
+//   }, []);
+//   return (
+//     <SafeAreaView>
+//       <ChatWindow
+//         message={message}
+//         sendToServer={message => {
+//           fb.writeUserData(message);
+//         }}
+//       />
+//     </SafeAreaView>
+//   );
+// };
 
 const App = () => {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fb.registerForNewMessages(messageFromServer => {
-      setMessage(messageFromServer);
-    });
-  }, []);
   return (
-    <SafeAreaView>
-      <ChatWindow
-        message={message}
-        sendToServer={message => {
-          fb.writeUserData(message);
-        }}
-      />
+    <SafeAreaView style={{flex: 1}}>
+      <GiftedChatWrapper />
     </SafeAreaView>
   );
 };
-
 export default App;
