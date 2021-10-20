@@ -3,10 +3,12 @@ import {
   Database,
   ref,
   set,
-  onValue,
+  push,
+  onChildAdded,
   Unsubscribe,
 } from 'firebase/database';
 import {initializeApp} from 'firebase/app';
+import {IMessage} from 'react-native-gifted-chat';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -31,22 +33,31 @@ class FirebaseInterface {
     this.database = getDatabase(app);
   }
 
-  writeUserData(message: string) {
-    console.log(`Writing ${message}`);
-    set(ref(this.database, 'users/drsandeep'), {
-      time: new Date().toISOString(),
-      message: message,
+  writeUserData(messages: IMessage[]) {
+    let messageRef = ref(this.database, 'users/drsandeep/messages');
+    const newMessageRef = push(messageRef);
+
+    messages.forEach(({_id, createdAt, text, user}) => {
+      console.log('Writing Data');
+
+      set(newMessageRef, {
+        _id,
+        createdAt: (createdAt as Date).toISOString(),
+        text,
+        user,
+      });
     });
   }
 
-  registerForNewMessages(messageListener: (message: string) => void) {
+  registerForNewMessages(messageListener: (message: any) => void) {
     if (this.unsubscribe !== undefined) {
       this.unsubscribe();
     }
-    this.unsubscribe = onValue(
-      ref(this.database, 'users/drsandeep/message'),
+
+    this.unsubscribe = onChildAdded(
+      ref(this.database, 'users/drsandeep/messages'),
       snapshot => {
-        messageListener(snapshot.val() as string);
+        messageListener(snapshot);
       },
     );
   }
