@@ -8,15 +8,28 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView} from 'react-native';
+import fb from './src/hailJesus/FirebaseInterface';
 
 import ChatWindow from './src/ChatWindow';
 
 const App = () => {
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fb.registerForNewMessages(messageFromServer => {
+      setMessage(messageFromServer);
+    });
+  }, []);
   return (
     <SafeAreaView>
-      <ChatWindow />
+      <ChatWindow
+        message={message}
+        sendToServer={message => {
+          fb.writeUserData(message);
+        }}
+      />
     </SafeAreaView>
   );
 };

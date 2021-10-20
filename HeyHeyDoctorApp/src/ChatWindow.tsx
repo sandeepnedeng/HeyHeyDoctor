@@ -1,13 +1,18 @@
 import React, {useState} from 'react';
-import {Button, TextInput} from 'react-native';
+import {Button, Text, TextInput} from 'react-native';
 
-import fb from './hailJesus/FirebaseInterface';
-
-const ChatWindow = () => {
+const ChatWindow = ({
+  message,
+  sendToServer,
+}: {
+  message: string;
+  sendToServer: (message: string) => void;
+}) => {
   const [text, setText] = useState('');
 
   return (
     <>
+      <Text>Some one sent this message: {message}</Text>
       <TextInput
         style={{
           borderColor: 'black',
@@ -21,7 +26,7 @@ const ChatWindow = () => {
       <Button
         title={'Click '}
         onPress={() => {
-          fb.writeUserData(text);
+          sendToServer(text);
         }}
       />
     </>

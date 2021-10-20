@@ -1,4 +1,11 @@
-import {getDatabase, Database, ref, set, onValue} from 'firebase/database';
+import {
+  getDatabase,
+  Database,
+  ref,
+  set,
+  onValue,
+  Unsubscribe,
+} from 'firebase/database';
 import {initializeApp} from 'firebase/app';
 
 // Your web app's Firebase configuration
@@ -17,11 +24,11 @@ const firebaseConfig = {
 
 class FirebaseInterface {
   database: Database;
-  sRef: any;
+  unsubscribe?: Unsubscribe;
 
   constructor() {
-    this.database = getDatabase(initializeApp(firebaseConfig));
-    this.sRef = ref(this.database, 'users/drsandeep/message');
+    let app = initializeApp(firebaseConfig);
+    this.database = getDatabase(app);
   }
 
   writeUserData(message: string) {
@@ -33,9 +40,15 @@ class FirebaseInterface {
   }
 
   registerForNewMessages(messageListener: (message: string) => void) {
-    onValue(this.sRef, snapshot => {
-      messageListener(snapshot.val() as string);
-    });
+    if (this.unsubscribe !== undefined) {
+      this.unsubscribe();
+    }
+    this.unsubscribe = onValue(
+      ref(this.database, 'users/drsandeep/message'),
+      snapshot => {
+        messageListener(snapshot.val() as string);
+      },
+    );
   }
 }
 
