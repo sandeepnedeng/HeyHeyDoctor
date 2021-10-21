@@ -26,7 +26,6 @@ const firebaseConfig = {
 
 class FirebaseInterface {
   database: Database;
-  unsubscribe?: Unsubscribe;
 
   constructor() {
     let app = initializeApp(firebaseConfig);
@@ -50,11 +49,7 @@ class FirebaseInterface {
   }
 
   registerForNewMessages(messageListener: (message: any) => void) {
-    if (this.unsubscribe !== undefined) {
-      this.unsubscribe();
-    }
-
-    this.unsubscribe = onChildAdded(
+    return onChildAdded(
       ref(this.database, 'users/drsandeep/messages'),
       snapshot => {
         messageListener(snapshot);

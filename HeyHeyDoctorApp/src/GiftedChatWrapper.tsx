@@ -1,49 +1,40 @@
-
 import React, {useState, useCallback, useEffect} from 'react';
 import {GiftedChat, IMessage} from 'react-native-gifted-chat';
 import {Text} from 'react-native';
 import fb from './hailJesus/FirebaseInterface';
-import user from './UserState';
 
+import user from './UserState';
 export function GiftedChatWrapper() {
   const [messages, setMessages] = useState<IMessage[]>([]);
 
-  useEffect(() => {
-    fb.registerForNewMessages(messageFromServer => {
-      console.log('Hey Hey Hey');
-      console.log(messageFromServer);
-      // setMessages(previousMessages =>
-      //   GiftedChat.append(previousMessages, [messageFromServer]),
-      // );
+  function removeDuplicates(iMessages: IMessage[]) {
+    const set = new Set<string>();
+
+    return iMessages.filter(item => {
+      if (set.has(item._id as string)) {
+        return false;
+      }
+
+      set.add(item._id as string);
+      return true;
     });
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: user.otherUser(),
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-      {
-        _id: 2,
-        text: 'Hello developer',
-        createdAt: new Date(),
-        user: {
-          _id: user.otherUser(),
-          name: 'React Native',
-          avatar: 'https://placeimg.com/140/140/any',
-        },
-      },
-    ]);
+  }
+  useEffect(() => {
+    return fb.registerForNewMessages(messageFromServer => {
+      const msg = messageFromServer.val() as IMessage;
+      setMessages(previousMessages => {
+        return removeDuplicates(GiftedChat.append(previousMessages, [msg]));
+      });
+    });
   }, []);
 
-  const onSend = useCallback((messages = []) => {
+  const onSend = useCallback((messages: IMessage[] = []) => {
+    messages.forEach(message => {
+      message.user._id = user.currentUser();
+    });
     fb.writeUserData(messages);
     setMessages(previousMessages =>
-      GiftedChat.append(previousMessages, messages),
+      removeDuplicates(GiftedChat.append(previousMessages, messages)),
     );
   }, []);
 
@@ -54,7 +45,7 @@ export function GiftedChatWrapper() {
         messages={messages}
         onSend={messages => onSend(messages)}
         user={{
-          _id: 1,
+          _id: user.currentUser(),
         }}
       />
     </>
